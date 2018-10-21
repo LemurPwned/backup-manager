@@ -14,12 +14,13 @@ class DirCrawler extends StatefulWidget {
 
 class _DirCrawler extends State<DirCrawler> {
   String currentDir = '.';
-
+  String lastDir = '.';
   Widget _getListingCard(String listing, String typeList) {
     return GestureDetector(
         onTap: () {
           if (typeList == 'directory') {
             setState(() {
+              lastDir = currentDir;
               currentDir = currentDir + '/' + listing;
               print("CLICKED $currentDir");
             });
@@ -50,20 +51,47 @@ class _DirCrawler extends State<DirCrawler> {
     );
   }
 
+  Widget _getCurrentDirCard() {
+    return Card(
+      color: Colors.grey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ListTile(
+            leading: Icon(Icons.folder_special),
+            title: Text("Current folder: $currentDir", style: secondaryStyle),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getFABBack() {
+    return FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            if (currentDir != '.') {
+              int lastSlash = currentDir.lastIndexOf('/');
+              currentDir = currentDir.substring(0, lastSlash);
+            }
+          });
+        },
+        key: Key("back"),
+        child: Icon(
+          Icons.keyboard_backspace,
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        bottomSheet: _getCurrentDirCard(),
         body: FutureBuilder(
             future: Server.fetchDirListings(currentDir),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Text("Loading");
               return _getListView(snapshot.data);
             }),
-        floatingActionButton: FloatingActionButton(
-            onPressed: () => print("Pressed"),
-            key: Key("back"),
-            child: Icon(
-              Icons.keyboard_backspace,
-            )));
+        floatingActionButton: _getFABBack());
   }
 }

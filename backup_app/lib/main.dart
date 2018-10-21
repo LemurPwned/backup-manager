@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:backup_app/dir_crawler.dart';
+import 'package:backup_app/backup_manager.dart';
 
 void main() => runApp(new BackupApp());
 
@@ -10,16 +11,58 @@ class BackupApp extends StatelessWidget {
     return new MaterialApp(
         title: 'Backup Manager',
         theme: new ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-          // counter didn't reset back to zero; the application is not restarted.
           primarySwatch: Colors.blue,
         ),
-        home: DirCrawler());
+        home: MainScaffold());
+  }
+}
+
+class MainScaffold extends StatefulWidget {
+  final screens = [
+    PageStorage(child: DirCrawler(), bucket: PageStorageBucket()),
+    PageStorage(child: BackupManager(), bucket: PageStorageBucket()),
+  ];
+  final List<String> names = ["Folder viewer", "Manager"];
+
+  @override
+  MainScaffoldState createState() {
+    return new MainScaffoldState();
+  }
+}
+
+class MainScaffoldState extends State<MainScaffold> {
+  int currentScreen = 1;
+  PageController _pageController = PageController(initialPage: 1);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        bottomNavigationBar: buildBottomNavigationBar(context),
+        backgroundColor: Color(0xFFF2F2F2),
+        body: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          children: widget.screens,
+        ));
+  }
+
+  BottomNavigationBar buildBottomNavigationBar(BuildContext context) {
+    return BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: currentScreen,
+        onTap: (index) {
+          this._pageController.animateToPage(index,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOut);
+          setState(() {
+            this.currentScreen = index;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.view_list), title: Text("Folders")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.backup), title: Text("Manager")),
+        ]);
   }
 }
