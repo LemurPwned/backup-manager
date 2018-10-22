@@ -24,9 +24,27 @@ class FileList:
 
 class BackupIO:
     def __init__(self):
-        pass
+        self.backup_local = 'backup_log.json'
 
     def localDirectoryContents(self, dir):
         print(f"LISITNG REQUESTED: {dir}")
         dir_object = FileList(dir)
         return dir_object.to_json()
+
+    def loadBackupServer(self):
+        try:
+            conts = json.load(open(self.backup_local))
+        except json.decoder.JSONDecodeError:
+            print("INVALID FILE")
+            conts = '{"folder": "None"}'
+        return conts
+
+    def saveBackupServer(self, new_conts):
+        new_conts = json.loads(new_conts)
+        try:
+            conts = self.loadBackupServer()
+            new_conts = {**conts, **new_conts}
+        except FileNotFoundError:
+            pass
+
+        json.dump(new_conts, open(self.backup_local, 'w'))

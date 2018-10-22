@@ -17,12 +17,10 @@ class _DirCrawler extends State<DirCrawler> {
   String lastDir = '.';
   Map<String, bool> backupDirs = Map();
 
-  bool selected_icon = false;
+  bool selectedIcon = false;
 
   bool isSelected(String lab) {
-    print("CALLED $lab");
     if (backupDirs.containsKey(lab)) {
-      print(backupDirs[lab]);
       return backupDirs[lab];
     } else {
       return false;
@@ -46,26 +44,28 @@ class _DirCrawler extends State<DirCrawler> {
                     } else {
                       backupDirs[currentDir + '/' + listing] = true;
                     }
-                    if (backupDirs.containsValue(true) && !this.selected_icon) {
+                    if (backupDirs.containsValue(true) && !this.selectedIcon) {
                       setState(() {
-                        print("SOMETHING SELECTED");
-                        this.selected_icon = true;
+                        this.selectedIcon = true;
                       });
                     } else if (!backupDirs.containsValue(true) &&
-                        this.selected_icon) {
-                      print("NOTHING SELECTED");
+                        this.selectedIcon) {
                       setState(() {
-                        this.selected_icon = false;
+                        this.selectedIcon = false;
                       });
                     }
                   });
                 },
                 onTap: () {
                   if (typeList == 'directory') {
+                    backupDirs.forEach((f, _) {
+                      backupDirs[f] = false;
+                    });
+
                     setState(() {
                       lastDir = currentDir;
                       currentDir = currentDir + '/' + listing;
-                      print("CLICKED $currentDir");
+                      this.selectedIcon = false;
                     });
                   }
                 },
@@ -114,14 +114,14 @@ class _DirCrawler extends State<DirCrawler> {
               int lastSlash = currentDir.lastIndexOf('/');
               currentDir = currentDir.substring(0, lastSlash);
             }
-            if (this.selected_icon) {
+            if (this.selectedIcon) {
               backupDirs.forEach((folder, _) => Server.postRequest(folder));
             }
           });
         },
         key: Key("back"),
         child: Icon(
-          this.selected_icon ? Icons.add : Icons.keyboard_backspace,
+          this.selectedIcon ? Icons.add : Icons.keyboard_backspace,
         ));
   }
 
