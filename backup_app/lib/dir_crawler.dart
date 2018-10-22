@@ -15,37 +15,77 @@ class DirCrawler extends StatefulWidget {
 class _DirCrawler extends State<DirCrawler> {
   String currentDir = '.';
   String lastDir = '.';
-  Widget _getListingCard(String listing, String typeList) {
-    return GestureDetector(
-        onTap: () {
-          if (typeList == 'directory') {
-            setState(() {
-              lastDir = currentDir;
-              currentDir = currentDir + '/' + listing;
-              print("CLICKED $currentDir");
-            });
-          }
-        },
-        child: Card(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
+  Map<String, bool> backupDirs = Map();
+
+  bool selected_icon = false;
+
+  bool isSelected(String lab) {
+    print("CALLED $lab");
+    if (backupDirs.containsKey(lab)) {
+      print(backupDirs[lab]);
+      return backupDirs[lab];
+    } else {
+      return false;
+    }
+  }
+
+  Widget _getListingCard(
+      String listing, String typeList, BuildContext context) {
+    return Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ListTileTheme(
+              selectedColor: Colors.lightBlue,
+              child: ListTile(
+                onLongPress: () {
+                  setState(() {
+                    if (backupDirs.containsKey(currentDir + '/' + listing)) {
+                      backupDirs[currentDir + '/' + listing] =
+                          !backupDirs[currentDir + '/' + listing];
+                    } else {
+                      backupDirs[currentDir + '/' + listing] = true;
+                    }
+                    if (backupDirs.containsValue(true) && !this.selected_icon) {
+                      setState(() {
+                        print("SOMETHING SELECTED");
+                        this.selected_icon = true;
+                      });
+                    } else if (!backupDirs.containsValue(true) &&
+                        this.selected_icon) {
+                      print("NOTHING SELECTED");
+                      setState(() {
+                        this.selected_icon = false;
+                      });
+                    }
+                  });
+                },
+                onTap: () {
+                  if (typeList == 'directory') {
+                    setState(() {
+                      lastDir = currentDir;
+                      currentDir = currentDir + '/' + listing;
+                      print("CLICKED $currentDir");
+                    });
+                  }
+                },
+                selected: isSelected(currentDir + '/' + listing),
                 leading: typeList == "file"
                     ? Icon(Icons.insert_drive_file)
                     : Icon(Icons.folder),
                 title: Text(listing, style: secondaryStyle),
                 subtitle: Text(typeList, style: secondaryStyle),
-              ),
-            ],
-          ),
-        ));
+              )),
+        ],
+      ),
+    );
   }
 
-  Widget _getListView(List<FileObj> listing) {
+  Widget _getListView(List<FileObj> listing, BuildContext context) {
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
-        return _getListingCard(listing[index].name, listing[index].type);
+        return _getListingCard(
+            listing[index].name, listing[index].type, context);
       },
       itemCount: listing.length,
     );
@@ -74,11 +114,14 @@ class _DirCrawler extends State<DirCrawler> {
               int lastSlash = currentDir.lastIndexOf('/');
               currentDir = currentDir.substring(0, lastSlash);
             }
+            if (this.selected_icon) {
+              backupDirs.forEach((folder, _) => Server.postRequest(folder));
+            }
           });
         },
         key: Key("back"),
         child: Icon(
-          Icons.keyboard_backspace,
+          this.selected_icon ? Icons.add : Icons.keyboard_backspace,
         ));
   }
 
@@ -90,7 +133,7 @@ class _DirCrawler extends State<DirCrawler> {
             future: Server.fetchDirListings(currentDir),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Text("Loading");
-              return _getListView(snapshot.data);
+              return _getListView(snapshot.data, context);
             }),
         floatingActionButton: _getFABBack());
   }
