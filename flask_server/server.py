@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request
+from flask import request, Response
 from backupIO import *
 
 app = Flask(__name__)
@@ -14,9 +14,7 @@ def hello_world():
 @app.route('/getDirectoryListing')
 def getListing():
     req = request.args.get('root_dir')
-    print(req)
     listing = io.localDirectoryContents(str(req))
-    print(listing)
     return listing
 
 
@@ -33,7 +31,17 @@ def parse_request():
 def get_backup_folder():
     # need posted data here
     folders = io.loadBackupServer()
+    if folders is None:
+        return Response("null", status='404', mimetype='application/json')
     return folders
+
+
+@app.route('/deleteBackupFolder')
+def delete_backup_folder():
+    # need posted data here
+    folder = request.args.get('folder')
+    io.deleteBackupFoldr(str(folder))
+    return '200'
 
 
 if __name__ == "__main__":
