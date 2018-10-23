@@ -110,12 +110,19 @@ class _DirCrawler extends State<DirCrawler> {
     return FloatingActionButton(
         onPressed: () {
           setState(() {
+            // delete trailing slash
             if (currentDir != '.') {
               int lastSlash = currentDir.lastIndexOf('/');
               currentDir = currentDir.substring(0, lastSlash);
             }
+            // if selected then send to the server
             if (this.selectedIcon) {
-              backupDirs.forEach((folder, _) => Server.postRequest(folder));
+              backupDirs.forEach((folder, _) {
+                Server.postRequest(folder);
+                // unselect all
+                backupDirs[folder] = false;
+              });
+              this.selectedIcon = false;
             }
           });
         },
