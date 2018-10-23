@@ -18,9 +18,10 @@ class BackupApp extends StatelessWidget {
 }
 
 class MainScaffold extends StatefulWidget {
+  static final bm = BackupManager();
   final screens = [
-    PageStorage(child: DirCrawler(), bucket: PageStorageBucket()),
-    PageStorage(child: BackupManager(), bucket: PageStorageBucket()),
+    PageStorage(child: DirCrawler(bm: bm), bucket: PageStorageBucket()),
+    PageStorage(child: bm, bucket: PageStorageBucket()),
   ];
   final List<String> names = ["Folder viewer", "Manager"];
 

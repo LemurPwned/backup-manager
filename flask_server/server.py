@@ -7,7 +7,7 @@ io = BackupIO()
 
 
 @app.route('/')
-def hello_world():
+def backup_greeting():
     return 'Backup manager'
 
 
@@ -23,14 +23,14 @@ def parse_request():
     data = request.data  # data is empty
     # need posted data here
     print(str(data))
-    io.saveBackupServer(data)
+    io.updateContent(data)
     return '200'
 
 
 @app.route('/getBackupFolders')
 def get_backup_folder():
     # need posted data here
-    folders = io.loadBackupServer()
+    folders = io.contentLoad()
     if folders is None:
         return Response("null", status='404', mimetype='application/json')
     return folders
@@ -40,7 +40,7 @@ def get_backup_folder():
 def delete_backup_folder():
     # need posted data here
     folder = request.args.get('folder')
-    io.deleteBackupFoldr(str(folder))
+    io.deleteContent(str(folder))
     return '200'
 
 

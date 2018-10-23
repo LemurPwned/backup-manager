@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:backup_app/server.dart';
+import 'package:backup_app/backup_manager.dart';
 
 final TextStyle secondaryStyle = TextStyle(
     fontFamily: "Roboto",
@@ -8,14 +9,29 @@ final TextStyle secondaryStyle = TextStyle(
     fontWeight: FontWeight.normal);
 
 class DirCrawler extends StatefulWidget {
+  @required
+  final BackupManager bm;
+
+  DirCrawler({this.bm});
   @override
   _DirCrawler createState() => _DirCrawler();
 }
 
-class _DirCrawler extends State<DirCrawler> {
+class _DirCrawler extends State<DirCrawler>
+    with AutomaticKeepAliveClientMixin<DirCrawler> {
   String currentDir = '.';
   String lastDir = '.';
   Map<String, bool> backupDirs = Map();
+  Future<List<FileObj>> _fileObjs;
+
+  @override
+  void initState() {
+    _fileObjs = Server.fetchDirListings(currentDir);
+    super.initState();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 
   bool selectedIcon = false;
 
@@ -66,6 +82,7 @@ class _DirCrawler extends State<DirCrawler> {
                       lastDir = currentDir;
                       currentDir = currentDir + '/' + listing;
                       this.selectedIcon = false;
+                      _fileObjs = Server.fetchDirListings(currentDir);
                     });
                   }
                 },
@@ -114,6 +131,7 @@ class _DirCrawler extends State<DirCrawler> {
             if (currentDir != '.') {
               int lastSlash = currentDir.lastIndexOf('/');
               currentDir = currentDir.substring(0, lastSlash);
+              _fileObjs = Server.fetchDirListings(currentDir);
             }
             // if selected then send to the server
             if (this.selectedIcon) {
@@ -123,6 +141,7 @@ class _DirCrawler extends State<DirCrawler> {
                 backupDirs[folder] = false;
               });
               this.selectedIcon = false;
+              // this.widget.bm.bmKey.currentState.updateState();
             }
           });
         },
@@ -137,7 +156,7 @@ class _DirCrawler extends State<DirCrawler> {
     return Scaffold(
         bottomSheet: _getCurrentDirCard(),
         body: FutureBuilder(
-            future: Server.fetchDirListings(currentDir),
+            future: _fileObjs,
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Text("Loading");
               return _getListView(snapshot.data, context);

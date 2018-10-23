@@ -31,61 +31,37 @@ class BackupIO:
         except FileNotFoundError:
             self.preloaded = False
 
-    def contentLoad(self, dir):
+    def contentLoad(self):
         if self.preloaded:
-            pass
+            return json.dumps(self.backup_data['backup_dirs'])
         else:
-            # create new
-            pass
+            return None
+
+    def updateContent(self, new_content):
+        if self.preloaded:
+            nkey = new_content['name']
+            if (nkey not in self.backup_data['backup_dirs'].keys()):
+                self.backup_data['backup_dirs'][nkey] = new_content
+        else:
+            self.addContent(new_content)
 
     def addContent(self, new_content):
-        if self.preloaded:
-            # do preloaded
-            pass
-        else:
-            # create new
-            pass
+        new_content = json.loads(new_content)
+        print(new_content)
+        self.backup_data = {'backup_dirs': {
+            new_content['name']: new_content}}
+        json.dump(self.backup_data,
+                  open(self.backup_local, 'w'))
+        self.preloaded = True
 
     def deleteContent(self, to_delete):
         if self.preloaded:
             # do preloaded
-            pass
+            deleted = self.backup_data['backup_dirs'].pop(to_delete, None)
+            print(f"Deleted {deleted} of {to_delete}")
         else:
-            # create new
-            pass
+            print("CANNOT DELETE EMPTY")
 
     def localDirectoryContents(self, dir):
-        print(f"LISITNG REQUESTED: {dir}")
         dir_object = FileList(dir)
         return dir_object.to_json()
-
-    def loadBackupServer(self):
-        try:
-            conts = json.load(open(self.backup_local))
-        except (json.decoder.JSONDecodeError, FileNotFoundError):
-            return None
-        return json.dumps(conts['backup_dirs'])
-
-    def saveBackupServer(self, new_conts):
-        new_conts = json.loads(new_conts)
-        try:
-            old_conts = json.load(open(self.backup_local))
-            try:
-                if (new_conts['name'] not in old_conts['backup_dirs'].keys()):
-                    old_conts['backup_dirs'][new_conts['name']] = new_conts
-                    json.dump(old_conts, open(self.backup_local, 'w'))
-            except KeyError:
-                # no such key in the list
-                pass
-        except FileNotFoundError:
-            json.dump({'backup_dirs': {new_conts['name']: new_conts}},
-                      open(self.backup_local, 'w'))
-
-    def deleteBackupFoldr(self, folder):
-        try:
-            old_conts = json.load(open(self.backup_local))
-            deleted = old_conts['backup_dirs'].pop(folder, None)
-            print(f"Deleted {deleted} of {folder}")
-            json.dump(old_conts, open(self.backup_local, 'w'))
-        except FileNotFoundError:
-            pass

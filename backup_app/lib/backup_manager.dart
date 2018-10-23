@@ -7,19 +7,31 @@ class BackupManager extends StatefulWidget {
   _BackupManager createState() => _BackupManager();
 }
 
-class _BackupManager extends State<BackupManager> {
-  // final Map<BackupObject, bool> backupList;
+class _BackupManager extends State<BackupManager>
+    with AutomaticKeepAliveClientMixin<BackupManager> {
   final Map<int, bool> selected = Map();
   List<BackupObject> currentObjs = List();
+  Future<List<BackupObject>> _futureObjs;
+
+  @override
+  bool get wantKeepAlive => false;
+
+  // @override
+  // void initState() {
+  //   this.updateState();
+  //   super.initState();
+  // }
+
+  // void updateState() {
+  //   _futureObjs = Server.fetchBackupFolders();
+  // }
 
   Widget _getBackupCard(BackupObject obj, int index) {
     return Card(
         child: ExpansionTile(
             onExpansionChanged: (expanded) {
-              print("CHANGED EXPANDED");
               setState(() {
                 if (expanded) {
-                  print("SELECTED TRUE");
                   selected[index] = true;
                 } else {
                   selected[index] = false;
@@ -41,13 +53,13 @@ class _BackupManager extends State<BackupManager> {
   }
 
   void deleteSelected() async {
-    print("DELETE");
     setState(() {
       selected.forEach((index, sel) async {
         if (sel) {
           await Server.deleteFolder(currentObjs[index].name);
           currentObjs.removeAt(index);
           selected[index] = false;
+          // this.updateState();
         }
       });
     });
