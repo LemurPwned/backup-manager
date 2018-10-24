@@ -7,14 +7,10 @@ class BackupManager extends StatefulWidget {
   _BackupManager createState() => _BackupManager();
 }
 
-class _BackupManager extends State<BackupManager>
-    with AutomaticKeepAliveClientMixin<BackupManager> {
+class _BackupManager extends State<BackupManager> {
   final Map<int, bool> selected = Map();
   List<BackupObject> currentObjs = List();
-  Future<List<BackupObject>> _futureObjs;
-
-  @override
-  bool get wantKeepAlive => false;
+  // Future<List<BackupObject>> _futureObjs;
 
   // @override
   // void initState() {

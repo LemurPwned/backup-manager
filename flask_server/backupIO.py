@@ -39,6 +39,7 @@ class BackupIO:
 
     def updateContent(self, new_content):
         if self.preloaded:
+            new_content = json.loads(new_content)
             nkey = new_content['name']
             if (nkey not in self.backup_data['backup_dirs'].keys()):
                 self.backup_data['backup_dirs'][nkey] = new_content

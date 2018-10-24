@@ -26,8 +26,12 @@ class _DirCrawler extends State<DirCrawler>
 
   @override
   void initState() {
-    _fileObjs = Server.fetchDirListings(currentDir);
+    this.updateState();
     super.initState();
+  }
+
+  void updateState() {
+    _fileObjs = Server.fetchDirListings(currentDir);
   }
 
   @override
@@ -82,7 +86,7 @@ class _DirCrawler extends State<DirCrawler>
                       lastDir = currentDir;
                       currentDir = currentDir + '/' + listing;
                       this.selectedIcon = false;
-                      _fileObjs = Server.fetchDirListings(currentDir);
+                      updateState();
                     });
                   }
                 },
@@ -131,7 +135,7 @@ class _DirCrawler extends State<DirCrawler>
             if (currentDir != '.') {
               int lastSlash = currentDir.lastIndexOf('/');
               currentDir = currentDir.substring(0, lastSlash);
-              _fileObjs = Server.fetchDirListings(currentDir);
+              this.updateState();
             }
             // if selected then send to the server
             if (this.selectedIcon) {
@@ -141,6 +145,7 @@ class _DirCrawler extends State<DirCrawler>
                 backupDirs[folder] = false;
               });
               this.selectedIcon = false;
+              this.updateState();
               // this.widget.bm.bmKey.currentState.updateState();
             }
           });
