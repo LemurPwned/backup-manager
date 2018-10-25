@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class FancyFab extends StatefulWidget {
   final Function() onPressedDelete;
   final Function() onPressedBackup;
-  final Function() onPressedEncrypt;
+  final Function(BuildContext context) onPressedEncrypt;
   final String tooltip;
   final IconData icon;
 
@@ -87,10 +87,12 @@ class _FancyFabState extends State<FancyFab>
     );
   }
 
-  Widget encrypted() {
+  Widget encrypted(BuildContext context) {
     return Container(
       child: FloatingActionButton(
-        onPressed: this.widget.onPressedEncrypt,
+        onPressed: () {
+          this.widget.onPressedEncrypt(context);
+        },
         tooltip: 'Encrypted backup',
         child: Icon(Icons.lock),
       ),
@@ -140,7 +142,7 @@ class _FancyFabState extends State<FancyFab>
             _translateButton.value * 2.0,
             0.0,
           ),
-          child: encrypted(),
+          child: encrypted(context),
         ),
         Transform(
           transform: Matrix4.translationValues(

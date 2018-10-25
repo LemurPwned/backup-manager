@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:backup_app/server.dart';
 import 'package:backup_app/backup_manager.dart';
-
-final TextStyle secondaryStyle = TextStyle(
-    fontFamily: "Roboto",
-    fontSize: 12.0,
-    letterSpacing: -0.12,
-    fontWeight: FontWeight.normal);
+import 'package:backup_app/globals.dart';
 
 class DirCrawler extends StatefulWidget {
   @required
@@ -163,7 +158,7 @@ class _DirCrawler extends State<DirCrawler>
         body: FutureBuilder(
             future: _fileObjs,
             builder: (context, snapshot) {
-              if (!snapshot.hasData) return Text("Loading");
+              if (!snapshot.hasData) return getNothingScreen("Loading");
               return _getListView(snapshot.data, context);
             }),
         floatingActionButton: _getFABBack());

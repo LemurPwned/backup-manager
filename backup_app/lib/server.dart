@@ -12,10 +12,15 @@ class BackupObject {
   String absolutePath;
   @required
   String name;
-  bool encrypted = false;
+  String encrypted = "false";
+  String lastBackup;
 
   BackupObject(
-      {this.lastUpdateDate, this.absolutePath, this.name, this.encrypted});
+      {this.lastUpdateDate,
+      this.absolutePath,
+      this.name,
+      this.encrypted,
+      this.lastBackup});
 
   List<Widget> getBackupObjectDropdown() {
     return [
@@ -31,6 +36,11 @@ class BackupObject {
       ),
       Text(
         "encrypted: ${this.encrypted}",
+        style: newStyle,
+        textAlign: TextAlign.left,
+      ),
+      Text(
+        "last_backup: ${this.lastBackup}",
         style: newStyle,
         textAlign: TextAlign.left,
       ),
@@ -75,9 +85,10 @@ class Server {
       List<BackupObject> objects = List();
       res.forEach((name, el) => objects.add(BackupObject(
           name: el['name'].toString(),
-          encrypted: el['encrypted'],
+          encrypted: el['encrypted'].toString(),
           absolutePath: el['absolutePath'].toString(),
-          lastUpdateDate: el['updated'])));
+          lastUpdateDate: el['updated'],
+          lastBackup: el['last_backup'])));
       return objects;
     } else if (response.statusCode == 404) {
       return List();
@@ -89,12 +100,34 @@ class Server {
 
   static Future<void> deleteFolder(String folder) async {
     final response =
-        await http.get("http://$ipAddr/deleteBackupFolder?folder=$folder");
+        await http.get("http://$ipAddr/manageBackupFolder?to_delete=$folder");
     if (response.statusCode == 200) {
       print("SUCCESSFULLY DELETED $folder");
     } else {
       // If that response was not OK, throw an error.
       throw Exception('Failed to delete');
+    }
+  }
+
+  static Future<void> backupFolder(String folder, String encrypted) async {
+    final response = await http.get(
+        "http://$ipAddr/manageBackupFolder?folder=$folder&encrypted=$encrypted");
+    if (response.statusCode == 200) {
+      print("SUCCESSFULLY BACKED UP $folder with $encrypted");
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Failed to backup');
+    }
+  }
+
+  static Future<void> changeBackupDir(String folder) async {
+    final response =
+        await http.get("http://$ipAddr/manageBackupFolder?change=$folder");
+    if (response.statusCode == 200) {
+      print("SUCCESSFULLY CHANGED $folder");
+    } else {
+      // If that response was not OK, throw an error.
+      throw Exception('Failed to backup');
     }
   }
 

@@ -33,7 +33,7 @@ class MainScaffold extends StatefulWidget {
 
 class MainScaffoldState extends State<MainScaffold> {
   int currentScreen = 0;
-  PageController _pageController = PageController(initialPage: 1);
+  PageController _pageController = PageController(initialPage: 0);
 
   @override
   Widget build(BuildContext context) {
