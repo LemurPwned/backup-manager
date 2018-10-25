@@ -36,12 +36,25 @@ def get_backup_folder():
     return folders
 
 
-@app.route('/deleteBackupFolder')
-def delete_backup_folder():
+@app.route('/manageBackupFolder')
+def manage_backup():
     # need posted data here
+    folder_to_change = request.args.get('change')
+    to_delete = request.args.get('to_delete')
     folder = request.args.get('folder')
-    io.deleteContent(str(folder))
-    return '200'
+    encrypt = request.args.get('encrypted')
+    if folder_to_change is not None and folder_to_change != '':
+        io.changeBackupFolder(str(folder_to_change))
+        return '200'
+    if to_delete is not None and to_delete != '':
+        io.deleteContent(str(to_delete))
+        return '200'
+    if folder is not None and folder != '':
+        print(str(folder))
+        io.backupContent(str(folder), encrypt)
+        return '200'
+    else:
+        return '404'
 
 
 if __name__ == "__main__":
