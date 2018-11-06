@@ -4,10 +4,8 @@ import 'package:backup_app/backup_manager.dart';
 import 'package:backup_app/globals.dart';
 
 class DirCrawler extends StatefulWidget {
-  @required
-  final BackupManager bm;
-
-  DirCrawler({this.bm});
+  final Server server;
+  DirCrawler({this.server});
   @override
   _DirCrawler createState() => _DirCrawler();
 }
@@ -26,7 +24,7 @@ class _DirCrawler extends State<DirCrawler>
   }
 
   void updateState() {
-    _fileObjs = Server.fetchDirListings(currentDir);
+    _fileObjs = this.widget.server.fetchDirListings(currentDir);
   }
 
   @override
@@ -135,13 +133,12 @@ class _DirCrawler extends State<DirCrawler>
             // if selected then send to the server
             if (this.selectedIcon) {
               backupDirs.forEach((folder, _) {
-                Server.postRequest(folder);
+                this.widget.server.postRequest(folder);
                 // unselect all
                 backupDirs[folder] = false;
               });
               this.selectedIcon = false;
               this.updateState();
-              // this.widget.bm.bmKey.currentState.updateState();
             }
           });
         },

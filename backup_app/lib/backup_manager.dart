@@ -4,6 +4,8 @@ import 'package:backup_app/fancy_fab.dart';
 import 'package:backup_app/globals.dart';
 
 class BackupManager extends StatefulWidget {
+  final Server server;
+  BackupManager({this.server});
   @override
   _BackupManager createState() => _BackupManager();
 }
@@ -57,7 +59,7 @@ class _BackupManager extends State<BackupManager> {
     List<int> removeIndicies = List();
     selected.forEach((index, sel) async {
       if (sel) {
-        await Server.deleteFolder(currentObjs[index].name);
+        await this.widget.server.deleteFolder(currentObjs[index].name);
         currentObjs.removeAt(index);
         selected[index] = false;
         removeIndicies.add(index);
@@ -81,7 +83,10 @@ class _BackupManager extends State<BackupManager> {
     setState(() {
       selected.forEach((index, sel) async {
         if (sel) {
-          await Server.backupFolder(currentObjs[index].name, encryptionPass);
+          await this
+              .widget
+              .server
+              .backupFolder(currentObjs[index].name, encryptionPass);
           this.selected[index] = false;
         }
       });
@@ -165,7 +170,7 @@ class _BackupManager extends State<BackupManager> {
             onPressedBackup: this.backUpSelected,
             onPressedEncrypt: encryptSelected),
         body: FutureBuilder(
-          future: Server.fetchBackupFolders(),
+          future: this.widget.server.fetchBackupFolders(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return getNothingScreen("Loading");
             if (snapshot.data.isEmpty) {
