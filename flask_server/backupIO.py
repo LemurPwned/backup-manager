@@ -49,6 +49,7 @@ class BackupIO:
             nkey = new_content['name']
             if (nkey not in self.backup_data['backup_dirs'].keys()):
                 self.backup_data['backup_dirs'][nkey] = new_content
+                self.snapshotDict()
         else:
             self.addContent(new_content)
 
@@ -69,6 +70,10 @@ class BackupIO:
         else:
             print("CANNOT DELETE EMPTY")
 
+    def snapshotDict(self):
+        json.dump(self.backup_data,
+                  open(self.backup_local, 'w'))
+
     def backupContent(self, folder, encrypted):
         if self.preloaded:
             print(
@@ -83,11 +88,14 @@ class BackupIO:
                     self.save_standard(folder, savename)
             except KeyError:
                 print("TRIED TO ACCESS DIRECTORY NOT IN BACKUP DIRS")
+            self.snapshotDict()
         else:
             print("BACKUPS NOT PRELOADED")
 
     def changeBackupFolder(self, folder):
         self.backup_dst = folder
+        if not os.path.isdir(self.backup_dst):
+            os.mkdir(self.backup_dst)
 
     def localDirectoryContents(self, dir):
         dir_object = FileList(dir)
