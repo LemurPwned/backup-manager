@@ -4,8 +4,8 @@ import 'package:backup_app/fancy_fab.dart';
 import 'package:backup_app/globals.dart';
 
 class BackupManager extends StatefulWidget {
-  final Server server;
-  BackupManager({this.server});
+  final String ipAddr;
+  BackupManager({this.ipAddr});
   @override
   _BackupManager createState() => _BackupManager();
 }
@@ -14,20 +14,23 @@ class _BackupManager extends State<BackupManager> {
   final Map<int, bool> selected = Map();
   List<BackupObject> currentObjs = List();
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey2 = new GlobalKey<FormState>();
+
   final passwordFieldController = TextEditingController();
+  final folderFieldController = TextEditingController();
   bool passwordLock = false;
   String passwordCont;
-  // Future<List<BackupObject>> _futureObjs;
+  Future<List<BackupObject>> _futureObjs;
 
-  // @override
-  // void initState() {
-  //   this.updateState();
-  //   super.initState();
-  // }
+  @override
+  void initState() {
+    this.updateState();
+    super.initState();
+  }
 
-  // void updateState() {
-  //   _futureObjs = Server.fetchBackupFolders();
-  // }
+  void updateState() {
+    _futureObjs = Server.fetchBackupFolders(this.widget.ipAddr);
+  }
 
   Widget _getBackupCard(BackupObject obj, int index) {
     return Card(
@@ -59,7 +62,7 @@ class _BackupManager extends State<BackupManager> {
     List<int> removeIndicies = List();
     selected.forEach((index, sel) async {
       if (sel) {
-        await this.widget.server.deleteFolder(currentObjs[index].name);
+        await Server.deleteFolder(currentObjs[index].name, this.widget.ipAddr);
         currentObjs.removeAt(index);
         selected[index] = false;
         removeIndicies.add(index);
@@ -83,18 +86,32 @@ class _BackupManager extends State<BackupManager> {
     setState(() {
       selected.forEach((index, sel) async {
         if (sel) {
-          await this
-              .widget
-              .server
-              .backupFolder(currentObjs[index].name, encryptionPass);
+          await Server.backupFolder(
+              currentObjs[index].name, encryptionPass, this.widget.ipAddr);
           this.selected[index] = false;
         }
       });
+      this.updateState();
     });
   }
 
   void backUpSelected() async {
     this.backupUpdate("");
+  }
+
+  Future<Widget> _getAlertForBackupChange(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              title: Text("Encryption settings"),
+              content: Container(
+                height: 150.0,
+                width: 80.0,
+                child: getFolderForm(),
+              ));
+        });
   }
 
   Future<Widget> _getAlertForEncryption(BuildContext context) {
@@ -107,12 +124,57 @@ class _BackupManager extends State<BackupManager> {
               content: Container(
                 height: 150.0,
                 width: 80.0,
-                child: getForm(),
+                child: getPassForm(),
               ));
         });
   }
 
-  Column getForm() {
+  Column getFolderForm() {
+    return Column(children: [
+      Padding(
+          padding: EdgeInsets.only(left: 25.0, right: 25.0),
+          child: Form(
+              key: this._formKey2,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                TextFormField(
+                  controller: folderFieldController,
+                  keyboardType: TextInputType.text,
+                  decoration: new InputDecoration(
+                      hintText: 'BACKUPS', labelText: 'Backup folder'),
+                ),
+              ]))),
+      ButtonBar(
+        children: <Widget>[
+          RaisedButton(
+            onPressed: () {
+              if (this._formKey2.currentState.validate()) {
+                Server.changeBackupDir(
+                    this.folderFieldController.text, this.widget.ipAddr);
+                Navigator.of(context).pop();
+              }
+            },
+            child: Text(
+              "OK",
+              style: TextStyle(color: Colors.white),
+            ),
+            color: Colors.blueAccent,
+          ),
+          RaisedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white),
+            ),
+            color: Colors.blueAccent,
+          )
+        ],
+      )
+    ]);
+  }
+
+  Column getPassForm() {
     return Column(children: [
       Padding(
           padding: EdgeInsets.only(left: 25.0, right: 25.0),
@@ -162,15 +224,29 @@ class _BackupManager extends State<BackupManager> {
     ]);
   }
 
+  Widget changeBackupFolder(BuildContext context) {
+    return Text("HELLO");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          leading: Icon(Icons.blur_circular),
+          title: Text("Backup viewer"),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () async => await _getAlertForBackupChange(context),
+            )
+          ],
+        ),
         floatingActionButton: FancyFab(
             onPressedDelete: this.deleteSelected,
             onPressedBackup: this.backUpSelected,
             onPressedEncrypt: encryptSelected),
         body: FutureBuilder(
-          future: this.widget.server.fetchBackupFolders(),
+          future: _futureObjs,
           builder: (context, snapshot) {
             if (!snapshot.hasData) return getNothingScreen("Loading");
             if (snapshot.data.isEmpty) {

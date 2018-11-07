@@ -18,7 +18,8 @@ class _SplashForm extends State<SplashForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: getForm(context));
+    return WillPopScope(
+        onWillPop: () async => false, child: Scaffold(body: getForm(context)));
   }
 
   Column getForm(context) {

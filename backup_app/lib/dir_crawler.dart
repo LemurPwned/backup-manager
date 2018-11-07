@@ -4,8 +4,8 @@ import 'package:backup_app/backup_manager.dart';
 import 'package:backup_app/globals.dart';
 
 class DirCrawler extends StatefulWidget {
-  final Server server;
-  DirCrawler({this.server});
+  final String ipAddr;
+  DirCrawler({this.ipAddr});
   @override
   _DirCrawler createState() => _DirCrawler();
 }
@@ -24,7 +24,7 @@ class _DirCrawler extends State<DirCrawler>
   }
 
   void updateState() {
-    _fileObjs = this.widget.server.fetchDirListings(currentDir);
+    _fileObjs = Server.fetchDirListings(currentDir, this.widget.ipAddr);
   }
 
   @override
@@ -107,7 +107,7 @@ class _DirCrawler extends State<DirCrawler>
 
   Widget _getCurrentDirCard() {
     return Card(
-      color: Colors.grey,
+      color: Colors.indigoAccent,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -133,7 +133,7 @@ class _DirCrawler extends State<DirCrawler>
             // if selected then send to the server
             if (this.selectedIcon) {
               backupDirs.forEach((folder, _) {
-                this.widget.server.postRequest(folder);
+                Server.postRequest(folder, this.widget.ipAddr);
                 // unselect all
                 backupDirs[folder] = false;
               });

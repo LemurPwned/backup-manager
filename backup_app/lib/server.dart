@@ -56,12 +56,10 @@ class FileObj {
 // 10.129.12.177
 // 192.168.1.6:5000
 class Server {
-  final String ipAddr;
-  Server({@required this.ipAddr});
-
-  Future<List<FileObj>> fetchDirListings(String currentDir) async {
-    final response = await http.get(
-        "http://${this.ipAddr}:5000/getDirectoryListing?root_dir=$currentDir");
+  static Future<List<FileObj>> fetchDirListings(
+      String currentDir, String ipAddr) async {
+    final response = await http
+        .get("http://${ipAddr}:5000/getDirectoryListing?root_dir=$currentDir");
     if (response.statusCode == 200) {
       var res = json.decode(response.body);
       print(res);
@@ -75,9 +73,8 @@ class Server {
     }
   }
 
-  Future<List<BackupObject>> fetchBackupFolders() async {
-    final response =
-        await http.get("http://${this.ipAddr}:5000/getBackupFolders");
+  static Future<List<BackupObject>> fetchBackupFolders(String ipAddr) async {
+    final response = await http.get("http://${ipAddr}:5000/getBackupFolders");
     if (response.statusCode == 200) {
       var res = json.decode(response.body);
       if (res == null) {
@@ -99,9 +96,9 @@ class Server {
     }
   }
 
-  Future<void> deleteFolder(String folder) async {
+  static Future<void> deleteFolder(String folder, String ipAddr) async {
     final response = await http
-        .get("http://${this.ipAddr}:5000/manageBackupFolder?to_delete=$folder");
+        .get("http://${ipAddr}:5000/manageBackupFolder?to_delete=$folder");
     if (response.statusCode == 200) {
       print("SUCCESSFULLY DELETED $folder");
     } else {
@@ -110,9 +107,10 @@ class Server {
     }
   }
 
-  Future<void> backupFolder(String folder, String encrypted) async {
+  static Future<void> backupFolder(
+      String folder, String encrypted, String ipAddr) async {
     final response = await http.get(
-        "http://${this.ipAddr}:5000/manageBackupFolder?folder=$folder&encrypted=$encrypted");
+        "http://${ipAddr}:5000/manageBackupFolder?folder=$folder&encrypted=$encrypted");
     if (response.statusCode == 200) {
       print("SUCCESSFULLY BACKED UP $folder with $encrypted");
     } else {
@@ -121,9 +119,9 @@ class Server {
     }
   }
 
-  Future<void> changeBackupDir(String folder) async {
+  static Future<void> changeBackupDir(String folder, String ipAddr) async {
     final response = await http
-        .get("http://${this.ipAddr}:5000/manageBackupFolder?change=$folder");
+        .get("http://${ipAddr}:5000/manageBackupFolder?change=$folder");
     if (response.statusCode == 200) {
       print("SUCCESSFULLY CHANGED $folder");
     } else {
@@ -132,14 +130,15 @@ class Server {
     }
   }
 
-  Future<http.Response> postRequest(String folderDst) async {
+  static Future<http.Response> postRequest(
+      String folderDst, String ipAddr) async {
     String name;
     if (folderDst.contains('/'))
       name = folderDst.substring(folderDst.lastIndexOf('/') + 1);
     else
       name = folderDst;
     print("The name $name");
-    var url = 'http://${this.ipAddr}:5000/addBackupFolder';
+    var url = 'http://${ipAddr}:5000/addBackupFolder';
     var body = jsonEncode({
       'name': name,
       'encrypted': false,
