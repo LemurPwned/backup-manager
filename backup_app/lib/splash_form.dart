@@ -10,11 +10,20 @@ class SplashForm extends StatefulWidget {
 class _SplashForm extends State<SplashForm> {
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   final ipAddrFieldController = TextEditingController();
+  final rootDirFieldController = TextEditingController();
+
   RegExp regExp = new RegExp(
     r"^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$",
     caseSensitive: false,
     multiLine: false,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    rootDirFieldController.text = ".";
+    ipAddrFieldController.text = '192.168.43.34';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,25 +36,36 @@ class _SplashForm extends State<SplashForm> {
       Padding(
           padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 150.0),
           child: Column(children: <Widget>[
-            Text(
-              "Enter the IPv4 address of the backup server",
-              style: newStyle,
+            Padding(
+              padding: EdgeInsets.only(bottom: 10.0),
+              child: Text(
+                "Enter the IPv4 address and root directory of the backup server",
+                style: newStyle,
+                textAlign: TextAlign.center,
+              ),
             ),
             Form(
                 key: this._formKey,
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   TextFormField(
-                    controller: ipAddrFieldController,
-                    keyboardType: TextInputType.number,
-                    validator: (ipText) {
-                      if (!regExp.hasMatch(ipText) || ipText.isEmpty) {
-                        return "Invalid IPv4 address";
-                      }
-                    },
+                      controller: ipAddrFieldController,
+                      keyboardType: TextInputType.number,
+                      validator: (ipText) {
+                        if (!regExp.hasMatch(ipText) || ipText.isEmpty) {
+                          return "Invalid IPv4 address";
+                        }
+                      },
+                      decoration: new InputDecoration(
+                          icon: Icon(Icons.network_check),
+                          hintText: 'e.g 192.168.1.5',
+                          labelText: 'ip address')),
+                  TextFormField(
+                    controller: rootDirFieldController,
+                    keyboardType: TextInputType.url,
                     decoration: new InputDecoration(
-                        icon: Icon(Icons.network_check),
-                        hintText: 'e.g 192.168.1.5',
-                        labelText: 'ip address'),
+                        icon: Icon(Icons.folder_open),
+                        hintText: 'for ex. ~/ or \$HOME or .',
+                        labelText: 'server root directory'),
                   ),
                 ]))
           ])),
@@ -57,8 +77,10 @@ class _SplashForm extends State<SplashForm> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            MainScaffold(ip: this.ipAddrFieldController.text)));
+                        builder: (context) => MainScaffold(
+                              ip: this.ipAddrFieldController.text,
+                              rootDir: this.rootDirFieldController.text,
+                            )));
               }
             },
             child: Text(

@@ -5,7 +5,8 @@ import 'package:backup_app/globals.dart';
 
 class DirCrawler extends StatefulWidget {
   final String ipAddr;
-  DirCrawler({this.ipAddr});
+  final String rootDir;
+  DirCrawler({this.ipAddr, this.rootDir});
   @override
   _DirCrawler createState() => _DirCrawler();
 }
@@ -19,6 +20,9 @@ class _DirCrawler extends State<DirCrawler>
 
   @override
   void initState() {
+    // initialize root dir
+    currentDir = this.widget.rootDir;
+    lastDir = this.widget.rootDir;
     this.updateState();
     super.initState();
   }
@@ -125,7 +129,7 @@ class _DirCrawler extends State<DirCrawler>
         onPressed: () {
           setState(() {
             // delete trailing slash
-            if (currentDir != '.') {
+            if (currentDir != this.widget.rootDir) {
               int lastSlash = currentDir.lastIndexOf('/');
               currentDir = currentDir.substring(0, lastSlash);
               this.updateState();

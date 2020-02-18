@@ -6,12 +6,14 @@ import 'package:backup_app/server.dart';
 class MainScaffold extends StatefulWidget {
   @required
   final String ip;
+  final String rootDir;
   final List<PageStorage> screens;
   final List<String> names = ["Folder viewer", "Manager"];
-  MainScaffold({this.ip})
+  MainScaffold({this.ip, this.rootDir})
       : screens = [
           PageStorage(
-              child: DirCrawler(ipAddr: ip), bucket: PageStorageBucket()),
+              child: DirCrawler(ipAddr: ip, rootDir: rootDir),
+              bucket: PageStorageBucket()),
           PageStorage(
               child: BackupManager(ipAddr: ip), bucket: PageStorageBucket()),
         ];

@@ -1,11 +1,11 @@
 {
-  "folders": [
-    {
-      "path": "backup_app"
-    },
-    {
-      "path": "flask_server"
-    }
-  ],
-  "settings": {}
+	"folders": [
+		{
+			"path": "backup_app"
+		},
+		{
+			"path": "flask_server"
+		}
+	],
+	"settings": {}
 }
